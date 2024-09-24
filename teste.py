@@ -51,7 +51,7 @@ while sair!=True:
     elif resposta ==8:
         pass
 
-arquivo=open('pousada.tx','w')
-arquivo=open('quarto.tx','w')
-arquivo=open('reserva.tx','w')
-arquivo=open('produto.tx','w')
+arquivo=open('pousada.txt','w')
+arquivo=open('quarto.txt','w')
+arquivo=open('reserva.txt','w')
+arquivo=open('produto.txt','w')
