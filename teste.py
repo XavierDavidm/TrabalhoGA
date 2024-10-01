@@ -1,6 +1,14 @@
 class Pousada:
     def __init__(self) -> None:
+        self.__nome=0
+
+    def carregaDados(self):
         pass
+
+    def salvaDados(self):
+        pass
+
+
 
 class Reserva:
     def __init__(self) -> None:
@@ -51,7 +59,3 @@ while sair!=True:
     elif resposta ==8:
         pass
 
-arquivo=open('pousada.txt','w')
-arquivo=open('quarto.txt','w')
-arquivo=open('reserva.txt','w')
-arquivo=open('produto.txt','w')
