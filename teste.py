@@ -24,6 +24,10 @@ class Produto:
 
 #chamar uma função que cria pousada se não existir e da load em uma existente (arquivo)
 #main menu
+#import os
+#if os.path.exists('nome_arquivo'): #
+#   with open('nome_arquivo')
+
 sair=False
 while sair!=True:
     print('seja bem-vindo!')
