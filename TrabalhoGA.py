@@ -82,7 +82,9 @@ class Produto: #atributos->int(codigo),str(nome),float(preco)
 
 #chamar uma função que cria pousada se não existir e da load em uma existente (arquivo)
 #main menu
-
+#ANOTAÇÃO
+#SERIALIZAR==CLASSE-->STRING
+#DESERIALIZAR==STRING-->CLASSE
 sair=False
 while sair!=True:
     print('seja bem-vindo!')
