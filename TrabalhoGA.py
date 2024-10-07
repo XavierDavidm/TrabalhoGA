@@ -1,11 +1,23 @@
+
+#OBSERVAÇÃO->por todo o codigo se encontram explicações das funções,metodos e atributos
+
+import os
+
 class Pousada:
-    def __init__(self,quartos,reservas,produtos): #atributos-> str(nome),str(contato),quartos-lista,reservas-lista,produtos-lista
+    def __init__(self): #atributos-> str(nome),str(contato),quartos-lista,reservas-lista,produtos-lista
+        #set dos atributos (serão substituidos pelos dados das funções que carregam os arquivos)
         self.__nome=0
         self.__contato=0
-        self.quartos=quartos
-        self.reservas=reservas
-        self.produtos=produtos
-    
+        self.quartos=0
+        self.reservas=0
+        self.produtos=0
+        self.carregaDados()   
+
+
+    #função especial para verificar se um arquivo existe ou não, será usada para garantir que os arquivos txt serão gerados se não existirem
+    def verificarArquivo(self,nomeArquivo):
+        return os.path.isfile(nomeArquivo)
+
     #atributo nome 
     @property
     def nome(self):
@@ -36,16 +48,20 @@ class Pousada:
 
     #metodos da pousada
     def carregaDados(self):
+        #carrega os dados dos arquivos de texto
+
+        #arquivo de quartos.txt para quarto(matriz)
         ARQquartos=open('quarto.txt','r')
         nLinhas=ARQquartos.readline()
-        print(nLinhas)
+        quartos=[]
         for i in range(nLinhas):
             a=ARQquartos.readline()
             a=a.split(1,1)
-            quarto=Quarto(a[0],a[1],a[2],a[3],) #ajustar consumo
-            
-
-
+            #ordem->numero,status,diaria,lista com codigos dos produtos
+            quarto=Quarto(a[0],a[1],a[2],a[3]) 
+            quartos.append(quarto)
+        ARQquartos.close()
+        return quartos
 
     def salvaDados(self):
         pass
@@ -69,7 +85,19 @@ class Pousada:
         pass
 
 class Quarto: #atributos->int(numero),char(categoria(s/m/p),float(diaria),int(consumo(lista)))
-    def __init__(self): 
+    def __init__(self,numero,status,diaria,consumo): 
+        self.numero=int(numero)
+        self.status=str(status)
+        self.diaria=float(diaria)
+        self.consumo=int(consumo())
+        
+    def adicionaConsumo():
+        pass
+    def listaConsumo():
+        pass
+    def valorTotalConsumo():
+        pass
+    def limpaConsumo():
         pass
 
 class Reserva:   #atributos->int(diaInicio),int(diaFim),string(cliente),quarto(Quarto),char(status(A/C/I/O))
@@ -83,8 +111,10 @@ class Produto: #atributos->int(codigo),str(nome),float(preco)
 #chamar uma função que cria pousada se não existir e da load em uma existente (arquivo)
 #main menu
 #ANOTAÇÃO
-#SERIALIZAR==CLASSE-->STRING
-#DESERIALIZAR==STRING-->CLASSE
+#SERIALIZAR==CLASSE-->STRING usar quando for salvar e precisar transformar todos os objetos para string na planilha
+#DESERIALIZAR==STRING-->CLASSE usar quando tiver as strings carregadas e transformar em objeto
+
+
 sair=False
 while sair!=True:
     print('seja bem-vindo!')
