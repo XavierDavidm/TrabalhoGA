@@ -220,6 +220,7 @@ class Pousada:
             if reserva.cliente.lower() == cliente.lower() and reserva.status == 'A':
                 reserva.status = 'I'  # 'I' = check-In
                 reserva_encontrada = True
+                #print dos dados
                 print(f"Data Inicial: {reserva.diaInicio}")
                 print(f"Data Final: {reserva.diaFim}")
                 TotalDias=reserva.diaFim-reserva.diaInicio
@@ -232,12 +233,42 @@ class Pousada:
                     print(f"Número: {quarto.numero}")
                     print(f"Categoria: {self.tipos_categorias.get(quarto.categoria, 'Desconhecido')}") 
                     print(f"Diária: {quarto.diaria}")
+                    print('Check-In realizado com sucesso! aproveite sua estadia!')
                 return  
         if not reserva_encontrada:
             print("Nenhuma reserva ativa encontrada no Nome informado.")
 
-    def realizaCheckOut(cliente):
-        pass
+    def realizaCheckOut(self, cliente):
+        reserva_encontrada = False
+        
+        for reserva in self.reservas:
+            if reserva.cliente.lower() == cliente.lower() and reserva.status == 'I':
+                reserva_encontrada = True
+                quarto = next((q for q in self.quartos if q.numero == reserva.quarto), None)
+                
+                if quarto:
+                    #calculos
+                    total_dias = reserva.diaFim - reserva.diaInicio
+                    total_diarias = total_dias * quarto.diaria
+                    total_consumo = quarto.valorTotalConsumo(pousada.produtos)
+                    valor_final = total_diarias + total_consumo
+                    #prints
+                    print(f"Cliente: {reserva.cliente}")
+                    print(f"Data Inicial: {reserva.diaInicio}")
+                    print(f"Data Final: {reserva.diaFim}")
+                    print(f"Quantidade de Dias: {total_dias}")
+                    print(f"Valor Total das Diárias: R${total_diarias:.2f}")
+                    #prints dos consumos
+                    quarto.listaConsumo(pousada.produtos)
+                    print(f"Valor Total dos Consumos: R${total_consumo:.2f}")
+                    print(f"Valor Final a ser Pago: R${valor_final:.2f}")
+                    #check-out
+                    reserva.status = 'O'  # 'O' = check-out
+                    #limpeza
+                    quarto.limpaConsumo()
+                    print("Check-out realizado com sucesso!")
+        if not reserva_encontrada:
+            print("Nenhuma reserva em check-in encontrada para o cliente informado.")
 
     def registrarConsumo(self):
         pass
@@ -256,14 +287,28 @@ class Quarto: #atributos->int(numero),char(categoria(s/m/p),float(diaria),int(co
     def adicionaConsumo():
         pass
 
-    def listaConsumo():
-        pass
+    def listaConsumo(self, produtos):
+        #Lista os produtos consumidos e seus preços
+        print(f"Consumo do Quarto {self.numero}:")
+        for codigo in self.consumo:
+            produto = next((p for p in produtos if p.codigo == int(codigo)), None)
+            if produto:
+                print(f"{produto.nome}: R${produto.preco:.2f}")
+            else:
+                print(f"Produto com código {codigo} não encontrado.")
 
-    def valorTotalConsumo():
-        pass
-
-    def limpaConsumo():
-        pass
+    def valorTotalConsumo(self, produtos):
+        #Calcula o valor total do consumo
+        total = 0
+        for codigo in self.consumo:
+            produto = next((p for p in produtos if p.codigo == int(codigo)), None)
+            if produto:
+                total += produto.preco
+        return total
+    
+    def limpaConsumo(self):
+        #Limpa a lista de consumo
+        self.consumo = []
 
 class Reserva:   #atributos->int(diaInicio),int(diaFim),string(cliente),quarto(Quarto),char(status(A/C/I/O))
     def __init__(self,quarto,diaInicio,diaFim,cliente,status):
@@ -359,7 +404,11 @@ while sair!=True:
         print("---------------------------")
 
     elif resposta == 6:
-        pousada.realizaCheckOut()
+        print("---------------------------")
+        cliente=str(input('digite o nome de quem é a reserva: '))
+        print("---------------------------")
+        pousada.realizaCheckOut(cliente)
+        print("---------------------------")
 
     elif resposta == 7:
         pousada.registrarConsumo()

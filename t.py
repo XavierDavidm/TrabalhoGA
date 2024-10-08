@@ -250,8 +250,8 @@ class Produto: #atributos->int(codigo),str(nome),float(preco)
 #main menu
 pousada=Pousada()
 sair=False
+print('Seja bem-vindo ao sistema da pousada',pousada.getNome(),'!')
 while sair!=True:
-    print('Seja bem-vindo ao sistema da pousada',pousada.getNome(),'!')
     print('----- MENU -----')
     print('1 -> Consultar disponibilidade')
     print('2 -> Consultar reserva')
