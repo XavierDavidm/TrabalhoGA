@@ -141,42 +141,33 @@ class Pousada:
                 for reserva in self.reservas:
                     if reserva.quarto == quarto.numero and reserva.diaInicio <= data <= reserva.diaFim:
                         print('O quarto escolhido já está ocupado!')
+                        print("---------------------------")
                         return
                 print('O quarto escolhido está disponível!')
                 print('Informações do quarto:')
                 print(f"Número: {quarto.numero}")
                 print(f"Categoria: {self.tipos_categorias.get(quarto.categoria, 'Desconhecido')}") 
                 print(f"Diária: {quarto.diaria}")
+                print("---------------------------")
                 return
         raise ValueError("Quarto inválido.")
 
     def consultaReserva(self, data=None, cliente=None, numero_quarto=None):
         reservas_encontradas = []
-
+        #sistema de validação de reserva, primeiro verifica Ativas
         for reserva in self.reservas:
-            # Verifica se a reserva é ativa
-            print(f"Status da reserva: {reserva.status}")
             if reserva.status != 'A':
                 continue  
-
-            # Debug: Imprimir informações da reserva
-            print(f"Verificando reserva: {reserva}")
-
-            # Converte data para inteiro se fornecida
-            if data is not None:
-                data = int(data)
-
-            # Debug: Imprimir valores de comparação
-            print(f"Comparando data: {data} (type: {type(data)}), Dia Início: {reserva.diaInicio} (type: {type(reserva.diaInicio)}), Dia Fim: {reserva.diaFim} (type: {type(reserva.diaFim)})")
-
-
-            # Filtro com dados do input
-            if (data is None or (reserva.diaInicio <= data <= reserva.diaFim)) and \
-            (cliente is None or reserva.cliente.lower() == cliente.lower()) and \
-            (numero_quarto is None or reserva.quarto == numero_quarto):
+            #filtro de nome do cliente,data e quarto
+            cliente_ok = (cliente is None or cliente.strip() == '' or reserva.cliente.lower() == cliente.lower())
+            data_ok = (data is None or (reserva.diaInicio <= data <= reserva.diaFim))
+            quarto_ok = (numero_quarto is None or reserva.quarto == numero_quarto)
+            #baseado nos campos digitados seram adicionados as reservas compativeis(lista)
+            if data_ok and cliente_ok and quarto_ok:
                 reservas_encontradas.append(reserva)
-
+        #sistema de print caso encontre a reserva correspondente ao filtro
         if reservas_encontradas:
+            print("---------------------------")
             print("Reservas encontradas:")
             for reserva in reservas_encontradas:
                 print(f"Cliente: {reserva.cliente}")
@@ -184,13 +175,33 @@ class Pousada:
                 print(f"Data Final: {reserva.diaFim}")
                 quarto = next((q for q in self.quartos if q.numero == reserva.quarto), None)
                 if quarto:
-                    print(f"Dados do Quarto: {quarto}")
+                    print('Informações do quarto:')
+                    print(f"Número: {quarto.numero}")
+                    print(f"Categoria: {self.tipos_categorias.get(quarto.categoria, 'Desconhecido')}") 
+                    print(f"Diária: {quarto.diaria}")
                 print("---------------------------")
         else:
             print("Nenhuma reserva encontrada com os dados informados.")
 
-    def realizarReserva(datas,clitente,quarto):
-        pass
+    def realizarReserva(self,dataI,dataF,cliente,numero_quarto):
+        #filtro disponivilidade quarto
+        for reserva in self.reservas:
+            if reserva.quarto == numero_quarto and \
+            (reserva.diaInicio <= dataF and reserva.diaFim >= dataI):
+                print("O quarto já está reservado para esse período.")
+                return
+
+        #filtra reserva ativa ou em check-in
+        for reserva in self.reservas:
+            if reserva.cliente.lower() == cliente.lower() and \
+            reserva.status in ['A', 'I']:  # 'A' = Ativa, 'I' = Check-In
+                print("O cliente já possui uma reserva ativa ou em check-in.")
+                return
+
+        #se passar nos filtros cria reserva e adiciona ao reservas(matriz)
+        nova_reserva = Reserva(numero_quarto, dataI, dataF, cliente, 'A')  # 'A' = Ativa
+        self.reservas.append(nova_reserva)
+        print("Reserva realizada com sucesso!")
 
     def cancelaReserva(cliente):
         pass
@@ -210,8 +221,6 @@ class Quarto: #atributos->int(numero),char(categoria(s/m/p),float(diaria),int(co
         self.categoria=str(categoria)
         self.diaria=float(diaria)
         self.consumo = consumo.split(',')
-        
-
     def __str__(self):
         return f"Quarto({self.numero},{self.categoria},{self.diaria},{self.consumo})"
     def __repr__(self):
@@ -258,8 +267,8 @@ class Produto: #atributos->int(codigo),str(nome),float(preco)
 #main menu
 pousada=Pousada()
 sair=False
+print('Seja bem-vindo ao sistema da pousada',pousada.getNome(),'!')
 while sair!=True:
-    print('Seja bem-vindo ao sistema da pousada',pousada.getNome(),'!')
     print('----- MENU -----')
     print('1 -> Consultar disponibilidade')
     print('2 -> Consultar reserva')
@@ -278,7 +287,7 @@ while sair!=True:
         print('Encerrando Sistema...')
 
     elif resposta == 1:
-        data=int(input('digite a data que deseja consultar'))
+        data=int(input('digite a data que deseja consultar: '))
         numero_quarto=int(input('digite o número do quarto que deseja consultar: '))
         pousada.consultaDisponibilidade(data,numero_quarto)
 
@@ -291,7 +300,12 @@ while sair!=True:
         pousada.consultaReserva(data, cliente, numero_quarto)
         
     elif resposta == 3:
-        pousada.realizarReserva()
+        dataI=int(input('digite a data inicial da sua reserva: '))
+        dataF=int(input('digite a data do fim da sua reserva: '))
+        cliente=str(input('digite seu nome para reserva: '))
+        numero_quarto=int(input('digite o número do quarto que deseja reservar: '))
+        pousada.realizarReserva(dataI,dataF,cliente,numero_quarto)
+
     elif resposta == 4:
         pousada.cancelaReserva()
     elif resposta == 5:
