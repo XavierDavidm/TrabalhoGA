@@ -23,7 +23,7 @@ class Pousada:
             'I': 'Check-In',
             'O': 'Check-Out',
         }
-        self.carregaDados()
+        self.carregaDados() #inclui deserialização integral
 
     #função especial para verificar se um arquivo existe ou não, será usada para garantir que os arquivos txt serão gerados se não existirem
     def verificarArquivo(self,nomeArquivo):
@@ -95,7 +95,6 @@ class Pousada:
                 quarto=Quarto(a[0],a[1],a[2],a[3]) #cria o objeto quarto
                 quartos.append(quarto) #coloca cada quarto(linha) em uma matriz
             self.quartos=quartos
-            print(self.quartos)
 
         #arquivo de reserva.txt para reservas(matriz)
         with open('reserva.txt','r') as ARQreservas:
@@ -106,24 +105,21 @@ class Pousada:
                 linha = ARQreservas.readline().strip()
                 a=linha.split(',',4)
                 #atributos->,quarto(Quarto),int(diaInicio),int(diaFim),string(cliente),char(status(A/C/I/O))
-                print(f"Carregando reserva: {a}")
                 reserva=Reserva(a[0],a[1],a[2],a[3],a[4]) #cria o objeto reserva
                 reservas.append(reserva) #coloca cada reserva(linha) em uma matriz(reservas)
                 self.reservas=reservas
-            print(self.reservas)
         
         #arquivo de produtos.txt para produtos(matriz)
-        with open('produto.txt','r') as ARQprodutos:
-            nLinhas=int(sum(1 for _ in ARQprodutos))
+        with open('produto.txt', 'r') as ARQprodutos:
+            nLinhas = int(sum(1 for _ in ARQprodutos))
             ARQprodutos.seek(0)
             produtos = []
             for i in range(nLinhas):
                 linha = ARQprodutos.readline().strip()
-                a=linha.split(',',3)
-                produto=Produto(a[0],a[1],a[2])
+                a = linha.split(',', 3)
+                produto = Produto(a[0].strip(), a[1].strip(), float(a[2].strip()))  # Remover espaços
                 produtos.append(produto)
             self.produtos=produtos
-            print(self.produtos)
         
         return {
             "quartos": self.quartos,
@@ -132,7 +128,21 @@ class Pousada:
         }
 
     def salvaDados(self):
-        pass
+        #filtra apenas reservas ativas e em check-in para serem salvas
+        reservas_validas=[reserva for reserva in self.reservas if reserva.status in ['A', 'I']]
+        #quartos
+        with open('quarto.txt', 'w') as f:
+            for quarto in self.quartos:
+                f.write(f"{quarto.numero},{quarto.categoria},{quarto.diaria},{','.join(quarto.consumo)}\n")
+        #reservas validas
+        with open('reserva.txt', 'w') as f:
+            for reserva in reservas_validas:
+                f.write(f"{reserva.quarto},{reserva.diaInicio},{reserva.diaFim},{reserva.cliente},{reserva.status}\n")
+        #produtos
+        with open('produto.txt', 'w') as f:
+            for produto in self.produtos:
+                f.write(f"{produto.codigo},{produto.nome},{produto.preco}\n")
+        print("Dados salvos com sucesso!")
 
     def consultaDisponibilidade(self, data, numero_quarto): 
         for quarto in self.quartos:
@@ -270,8 +280,35 @@ class Pousada:
         if not reserva_encontrada:
             print("Nenhuma reserva em check-in encontrada para o cliente informado.")
 
-    def registrarConsumo(self):
-        pass
+    def registrarConsumo(self, cliente):
+        #validação check-in do cliente informado
+        reserva_encontrada = None
+        for reserva in self.reservas:
+            if reserva.cliente.lower() == cliente.lower() and reserva.status == 'I':
+                reserva_encontrada = reserva
+                break
+        if not reserva_encontrada:
+            print("Nenhuma reserva em check-in encontrada para o cliente informado.")
+            return
+        #print dos produtos disponíveis
+        print("Produtos disponíveis na copa:")
+        for produto in self.produtos:
+            print(f"Código: {produto.codigo}, Nome: {produto.nome}, Preço: R${produto.preco:.2f}")
+        #input do codigo
+        codigo_produto = input("Digite o código do produto desejado: ")
+        codigo_limpo = codigo_produto.strip() 
+        #validaçao de produto
+        produto_encontrado = next((p for p in self.produtos if p.codigo == int(codigo_limpo)), None)
+        if produto_encontrado:
+            quarto = next((q for q in self.quartos if q.numero == reserva_encontrada.quarto), None)
+            if quarto:
+                # Adiciona o consumo usando o método da classe Quarto
+                quarto.adicionaConsumo(codigo_limpo)  # Adiciona o código do produto à lista de consumo
+                print(f"Consumo registrado: {produto_encontrado.nome} - R${produto_encontrado.preco:.2f}")
+            else:
+                print("Quarto não encontrado.")
+        else:
+            print("Produto não encontrado.")
 
 class Quarto: #atributos->int(numero),char(categoria(s/m/p),float(diaria),int(consumo(lista)))
     def __init__(self,numero,categoria,diaria,consumo): 
@@ -284,24 +321,31 @@ class Quarto: #atributos->int(numero),char(categoria(s/m/p),float(diaria),int(co
     def __repr__(self):
         return self.__str__()
 
-    def adicionaConsumo():
-        pass
+    def adicionaConsumo(self, codigo_produto):
+        self.consumo.append(codigo_produto)
 
     def listaConsumo(self, produtos):
-        #Lista os produtos consumidos e seus preços
-        print(f"Consumo do Quarto {self.numero}:")
+        if not self.consumo:
+            print("Não há consumo registrado para este quarto.")
+            return
+        print("Consumo do Quarto", self.numero, ":")
         for codigo in self.consumo:
-            produto = next((p for p in produtos if p.codigo == int(codigo)), None)
-            if produto:
-                print(f"{produto.nome}: R${produto.preco:.2f}")
-            else:
-                print(f"Produto com código {codigo} não encontrado.")
+            codigo_limpo = codigo.strip('() ') #limpeza de caracteres
+            try:
+                produto = next((p for p in produtos if p.codigo == int(codigo_limpo)), None)
+                if produto:
+                    print(f"Produto: {produto.nome}, Preço: R${produto.preco:.2f}")
+                else:
+                    print(f"Produto com código {codigo_limpo} não encontrado.")
+            except ValueError:
+                print(f"Código de produto inválido: {codigo}.")
 
     def valorTotalConsumo(self, produtos):
-        #Calcula o valor total do consumo
-        total = 0
+        total = 0.0
         for codigo in self.consumo:
-            produto = next((p for p in produtos if p.codigo == int(codigo)), None)
+            #para garantir que será int e não havera nenhum espaço ou ' e ()
+            codigo_limpo = codigo.strip('() ')  
+            produto = next((p for p in produtos if p.codigo == int(codigo_limpo)), None)
             if produto:
                 total += produto.preco
         return total
@@ -331,10 +375,6 @@ class Produto: #atributos->int(codigo),str(nome),float(preco)
         return f"Produto({self.codigo},{self.nome},{self.preco})"
     def __repr__(self):
         return self.__str__()
-    
-#ANOTAÇÃO
-#SERIALIZAR==CLASSE-->STRING usar quando for salvar e precisar transformar todos os objetos para string na planilha
-#DESERIALIZAR==STRING-->CLASSE usar quando tiver as strings carregadas e transformar em objeto
 
 #main menu
 pousada=Pousada()
@@ -352,11 +392,11 @@ while sair!=True:
     print('8 -> Salvar')
     print('0 -> Sair')
     resposta=int(input('Selecione a opção que deseja realizar: '))
+
     if resposta == 0:
         print("---------------------------")
         sair=True
         pousada.salvaDados()
-        print('Dados Salvos com sucesso!')
         print('Encerrando Sistema...')
         print("---------------------------")
 
@@ -411,8 +451,11 @@ while sair!=True:
         print("---------------------------")
 
     elif resposta == 7:
-        pousada.registrarConsumo()
+        print("---------------------------")
+        cliente=str(input('digite o nome de quem é a reserva: '))
+        print("---------------------------")
+        pousada.registrarConsumo(cliente)
+        print("---------------------------")
 
     elif resposta == 8:
         pousada.salvaDados()
-        print('Dados Salvos com sucesso!')

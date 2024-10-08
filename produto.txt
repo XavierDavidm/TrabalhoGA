@@ -1,1 +1,10 @@
 1,garrafa de agua 2L,6.75
+2,sanduíche natural,12.5
+3,cerveja lata,8.0
+4,refrigerante 1L,5.0
+5,chocolate,3.5
+6,pipoca,4.0
+7,fruta da estação,2.5
+8,bolo de chocolate,15.0
+9,café,3.0
+10,água mineral 500ml,3.0

@@ -1,1 +1,9 @@
-101,10,20,David Gabriel,I
+101,10,15,David,I
+102,12,18,Lucia,I
+103,20,25,Carlos,A
+201,10,12,Elena,A
+202,11,14,Fernando,A
+203,13,19,Marcos,A
+304,15,20,Sofia,I
+305,12,18,Paula,A
+301,20,25,jonas,A
