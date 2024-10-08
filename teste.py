@@ -203,8 +203,18 @@ class Pousada:
         self.reservas.append(nova_reserva)
         print("Reserva realizada com sucesso!")
 
-    def cancelaReserva(cliente):
-        pass
+    def cancelaReserva(self, cliente):
+        #procura até encontrar a reserva ativa no nome do cliente
+        #caso contrario retorna que não ha reserva ativa
+        reserva_encontrada = False
+        for reserva in self.reservas:
+            if reserva.cliente.lower() == cliente.lower() and reserva.status == 'A':
+                reserva.status = 'C'  # 'C' = Cancelada
+                reserva_encontrada = True
+                print(f"Reserva do cliente '{cliente}' foi cancelada com sucesso!")
+                break
+        if not reserva_encontrada:
+            print("Nenhuma reserva ativa encontrada para o cliente informado.")
 
     def realizaCheckIn(cliente):
         pass
@@ -307,7 +317,9 @@ while sair!=True:
         pousada.realizarReserva(dataI,dataF,cliente,numero_quarto)
 
     elif resposta == 4:
-        pousada.cancelaReserva()
+        cliente=str(input('digite o nome em que a reserva está registrada para cancelar: '))
+        pousada.cancelaReserva(cliente)
+        
     elif resposta == 5:
         pousada.realizaCheckIn()
     elif resposta == 6:
