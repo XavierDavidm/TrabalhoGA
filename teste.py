@@ -50,25 +50,73 @@ class Pousada:
     #metodos da pousada
     def carregaDados(self):
         #carrega os dados dos arquivos de texto
-        #arquivo pousada para nome e 
+        #arquivo pousada.txt para nome e contato da pousada
+        #também verifica se o arquivo pousada.txt existe
+        nomeArquivo='pousada.txt'
+        if self.verificarArquivo(nomeArquivo)==True:
+            with open('pousada.txt','r') as ARQpousada:
+                nLinhas = int(ARQpousada.readline().strip())
+                nLinhas = int(nLinhas)
+                for i in range(nLinhas):
+                    linha = ARQpousada.readline().strip()
+                    a=linha.split(',',2)
+                    self.__nome=a[0]
+                    self.__contato=a[1]
+        else:
+            with open('pousada.txt','w') as ARQpousada:
+                self.registarNome()
+                self.registrarContato()
+                ARQpousada.writelines('1')
+                dados=(self.nome,',',self.contato)
+                dados=str(dados)
+                ARQpousada.writelines(dados)
 
-
-
-
-
-        #arquivo de quartos.txt para quarto(matriz)
+        #arquivo de quartos.txt para quartos(matriz)
         with open('quarto.txt','r') as ARQquartos:
-            nLinhas = int(ARQquartos.readline().strip())
-            nLinhas = int(nLinhas)
+            nLinhas=int(sum(1 for _ in ARQquartos))
+            ARQquartos.seek(0)
             quartos = []
             for i in range(nLinhas):
                 linha = ARQquartos.readline().strip()
                 a=linha.split(',',3)
                 #ordem->numero,status,diaria,lista com codigos dos produtos
                 quarto=Quarto(a[0],a[1],a[2],a[3]) #cria o objeto quarto
-                quartos.append(a) #coloca cada quarto(linha) em uma matriz
-            print(quartos)
-            return quartos
+                quartos.append(quarto) #coloca cada quarto(linha) em uma matriz
+            self.quartos=quartos
+            print(self.quartos)
+
+        #arquivo de reserva.txt para reservas(matriz)
+        with open('reserva.txt','r') as ARQreservas:
+            nLinhas=int(sum(1 for _ in ARQreservas))
+            ARQreservas.seek(0)
+            reservas = []
+            for i in range(nLinhas):
+                linha = ARQreservas.readline().strip()
+                a=linha.split(',',4)
+                #atributos->int(diaInicio),int(diaFim),string(cliente),quarto(Quarto),char(status(A/C/I/O))
+                reserva=Reserva(a[0],a[1],a[2],a[3],a[4]) #cria o objeto reserva
+                reservas.append(reserva) #coloca cada reserva(linha) em uma matriz(reservas)
+                self.reservas=reservas
+            print(self.reservas)
+        
+        #arquivo de produtos.txt para produtos(matriz)
+        with open('produto.txt','r') as ARQprodutos:
+            nLinhas=int(sum(1 for _ in ARQprodutos))
+            ARQprodutos.seek(0)
+            produtos = []
+            for i in range(nLinhas):
+                linha = ARQprodutos.readline().strip()
+                a=linha.split(',',3)
+                produto=Produto(a[0],a[1],a[2])
+                produtos.append(produto)
+            self.produtos=produtos
+            print(self.produtos)
+        
+        return {
+            "quartos": self.quartos,
+            "reservas": self.reservas,
+            "produtos": self.produtos
+        }
 
     def salvaDados(self):
         pass
@@ -96,8 +144,12 @@ class Quarto: #atributos->int(numero),char(categoria(s/m/p),float(diaria),int(co
         self.numero=int(numero)
         self.status=str(status)
         self.diaria=float(diaria)
-        self.consumo=list(consumo)
-        
+        self.consumo = consumo.split(',')
+    def __str__(self):
+        return f"Quarto({self.numero},{self.status},{self.diaria},{self.consumo})"
+    def __repr__(self):
+        return self.__str__()
+
     def adicionaConsumo():
         pass
     def listaConsumo():
@@ -108,13 +160,28 @@ class Quarto: #atributos->int(numero),char(categoria(s/m/p),float(diaria),int(co
         pass
 
 class Reserva:   #atributos->int(diaInicio),int(diaFim),string(cliente),quarto(Quarto),char(status(A/C/I/O))
-    def __init__(self):
-        pass
+    def __init__(self,diaInicio,diaFim,cliente,quarto,status):
+        self.diaInicio=int(diaInicio)
+        self.diaFim=int(diaFim)
+        self.cliente=str(cliente)
+        self.quarto=quarto
+        self.status=str(status)
+    def __str__(self):
+        return f"Reserva({self.diaInicio},{self.diaFim},{self.cliente},{self.quarto},{self.status})"
+    def __repr__(self):
+        return self.__str__()
+
+
 
 class Produto: #atributos->int(codigo),str(nome),float(preco)
-    def __init__(self):
-        pass
-
+    def __init__(self,codigo,nome,preco):
+        self.codigo=int(codigo)
+        self.nome=str(nome)
+        self.preco=float(preco)
+    def __str__(self):
+        return f"Produto({self.codigo},{self.nome},{self.preco})"
+    def __repr__(self):
+        return self.__str__()
 #chamar uma função que cria pousada se não existir e da load em uma existente (arquivo)
 #main menu
 #ANOTAÇÃO
