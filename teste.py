@@ -8,10 +8,16 @@ class Pousada:
         #set dos atributos (serão substituidos pelos dados das funções que carregam os arquivos)
         self.__nome=0
         self.__contato=0
-        self.quartos=0
-        self.reservas=0
-        self.produtos=0
-        self.carregaDados()   
+        self.quartos = []  
+        self.reservas = [] 
+        self.produtos = []
+        #dicionario para as categorias dos quartos
+        self.tipos_categorias = { 
+            'M': 'Master',
+            'S': 'Standard',
+            'P': 'Premium',
+        }
+        self.carregaDados()
 
     #função especial para verificar se um arquivo existe ou não, será usada para garantir que os arquivos txt serão gerados se não existirem
     def verificarArquivo(self,nomeArquivo):
@@ -121,15 +127,21 @@ class Pousada:
     def salvaDados(self):
         pass
 
-    def consultaDisponibilidade(self,data,numero_quarto): 
-        for index, quarto in enumerate(self.quartos):
+    def consultaDisponibilidade(self, data, numero_quarto): 
+        for quarto in self.quartos:
             if quarto.numero == numero_quarto:
-                if any(reserva.diaInicio == data for reserva in self.reservas[index]):
-                    print('o Quarto escolhido já está ocupado!') 
-                else:
-                    print('o Quarto escolhido está disponivel!')
-                    print(self.quartos)
-
+                # Verifica se a data está entre diaInicio e diaFim de qualquer reserva
+                for reserva in self.reservas:
+                    if reserva.quarto == quarto.numero and reserva.diaInicio <= data <= reserva.diaFim:
+                        print('O quarto escolhido já está ocupado!')
+                        return
+                print('O quarto escolhido está disponível!')
+                print('Informações do quarto:')
+                print(f"Número: {quarto.numero}")
+                print(f"Categoria: {self.tipos_categorias.get(quarto.categoria, 'Desconhecido')}") 
+                print(f"Diária: {quarto.diaria}")
+            
+                return
         raise ValueError("Quarto inválido.")
 
     def consultaReserva(self,cliente,quarto):
@@ -151,13 +163,15 @@ class Pousada:
         pass
 
 class Quarto: #atributos->int(numero),char(categoria(s/m/p),float(diaria),int(consumo(lista)))
-    def __init__(self,numero,status,diaria,consumo): 
+    def __init__(self,numero,categoria,diaria,consumo): 
         self.numero=int(numero)
-        self.status=str(status)
+        self.categoria=str(categoria)
         self.diaria=float(diaria)
         self.consumo = consumo.split(',')
+        
+
     def __str__(self):
-        return f"Quarto({self.numero},{self.status},{self.diaria},{self.consumo})"
+        return f"Quarto({self.numero},{self.categoria},{self.diaria},{self.consumo})"
     def __repr__(self):
         return self.__str__()
 
@@ -175,7 +189,7 @@ class Quarto: #atributos->int(numero),char(categoria(s/m/p),float(diaria),int(co
 
 class Reserva:   #atributos->int(diaInicio),int(diaFim),string(cliente),quarto(Quarto),char(status(A/C/I/O))
     def __init__(self,quarto,diaInicio,diaFim,cliente,status):
-        self.quarto=quarto
+        self.quarto=int(quarto)
         self.diaInicio=int(diaInicio)
         self.diaFim=int(diaFim)
         self.cliente=str(cliente)
