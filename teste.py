@@ -40,7 +40,7 @@ class Pousada:
         raise ValueError('erro contato pousada')
     #usado somente se não existir contato no pousada.txt
     def registrarContato(self):
-        contato=str(input('digite o contato da pousada'))
+        contato=str(input('digite o contato da pousada: '))
         self.__contato=contato
     def getContato(self):
         return self.__contato
@@ -93,7 +93,7 @@ class Pousada:
             for i in range(nLinhas):
                 linha = ARQreservas.readline().strip()
                 a=linha.split(',',4)
-                #atributos->int(diaInicio),int(diaFim),string(cliente),quarto(Quarto),char(status(A/C/I/O))
+                #atributos->,quarto(Quarto),int(diaInicio),int(diaFim),string(cliente),char(status(A/C/I/O))
                 reserva=Reserva(a[0],a[1],a[2],a[3],a[4]) #cria o objeto reserva
                 reservas.append(reserva) #coloca cada reserva(linha) em uma matriz(reservas)
                 self.reservas=reservas
@@ -121,8 +121,16 @@ class Pousada:
     def salvaDados(self):
         pass
 
-    def consultaDisponibilidade(self,data,quarto): #quarto se refere ao quarto escolhido pelo cliente atraves de input
-        pass
+    def consultaDisponibilidade(self,data,numero_quarto): 
+        for index, quarto in enumerate(self.quartos):
+            if quarto.numero == numero_quarto:
+                if any(reserva.diaInicio == data for reserva in self.reservas[index]):
+                    print('o Quarto escolhido já está ocupado!') 
+                else:
+                    print('o Quarto escolhido está disponivel!')
+                    print(self.quartos)
+
+        raise ValueError("Quarto inválido.")
 
     def consultaReserva(self,cliente,quarto):
         pass
@@ -139,6 +147,9 @@ class Pousada:
     def realizaCheckOut(cliente):
         pass
 
+    def registrarConsumo(self):
+        pass
+
 class Quarto: #atributos->int(numero),char(categoria(s/m/p),float(diaria),int(consumo(lista)))
     def __init__(self,numero,status,diaria,consumo): 
         self.numero=int(numero)
@@ -152,26 +163,27 @@ class Quarto: #atributos->int(numero),char(categoria(s/m/p),float(diaria),int(co
 
     def adicionaConsumo():
         pass
+
     def listaConsumo():
         pass
+
     def valorTotalConsumo():
         pass
+
     def limpaConsumo():
         pass
 
 class Reserva:   #atributos->int(diaInicio),int(diaFim),string(cliente),quarto(Quarto),char(status(A/C/I/O))
-    def __init__(self,diaInicio,diaFim,cliente,quarto,status):
+    def __init__(self,quarto,diaInicio,diaFim,cliente,status):
+        self.quarto=quarto
         self.diaInicio=int(diaInicio)
         self.diaFim=int(diaFim)
         self.cliente=str(cliente)
-        self.quarto=quarto
         self.status=str(status)
     def __str__(self):
-        return f"Reserva({self.diaInicio},{self.diaFim},{self.cliente},{self.quarto},{self.status})"
+        return f"Reserva({self.quarto},{self.diaInicio},{self.diaFim},{self.cliente},{self.status})"
     def __repr__(self):
         return self.__str__()
-
-
 
 class Produto: #atributos->int(codigo),str(nome),float(preco)
     def __init__(self,codigo,nome,preco):
@@ -182,44 +194,16 @@ class Produto: #atributos->int(codigo),str(nome),float(preco)
         return f"Produto({self.codigo},{self.nome},{self.preco})"
     def __repr__(self):
         return self.__str__()
-#chamar uma função que cria pousada se não existir e da load em uma existente (arquivo)
-#main menu
+    
 #ANOTAÇÃO
 #SERIALIZAR==CLASSE-->STRING usar quando for salvar e precisar transformar todos os objetos para string na planilha
 #DESERIALIZAR==STRING-->CLASSE usar quando tiver as strings carregadas e transformar em objeto
 
+#main menu
 pousada=Pousada()
-print('Seja bem-vindo ao sistema da',pousada.getNome(),'!')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-sair=True
+sair=False
 while sair!=True:
-    print('seja bem-vindo!')
+    print('Seja bem-vindo ao sistema da pousada',pousada.getNome(),'!')
     print('----- MENU -----')
     print('1 -> Consultar disponibilidade')
     print('2 -> Consultar reserva')
@@ -233,21 +217,25 @@ while sair!=True:
     resposta=int(input('Selecione a opção que deseja realizar: '))
     if resposta == 0:
         sair=True
-        #chamar o save aqui antes de sair
+        pousada.salvaDados()
+        print('Dados Salvos com sucesso!')
         print('Encerrando Sistema...')
-    elif resposta ==1:
-        pass
-    elif resposta ==2:
-        pass
-    elif resposta ==3:
-        pass
-    elif resposta ==4:
-        pass
-    elif resposta ==5:
-        pass
-    elif resposta ==6:
-        pass
-    elif resposta ==7:
-        pass
-    elif resposta ==8:
-        pass
+    elif resposta == 1:
+        data=int(input('digite a data que deseja consultar'))
+        numero_quarto=int(input('digite o número do quarto que deseja consultar: '))
+        pousada.consultaDisponibilidade(data,numero_quarto)
+    elif resposta == 2:
+        pousada.consultaReserva()
+    elif resposta == 3:
+        pousada.realizarReserva()
+    elif resposta == 4:
+        pousada.cancelaReserva()
+    elif resposta == 5:
+        pousada.realizaCheckIn()
+    elif resposta == 6:
+        pousada.realizaCheckOut()
+    elif resposta == 7:
+        pousada.registrarConsumo()
+    elif resposta == 8:
+        pousada.salvaDados()
+        print('Dados Salvos com sucesso!')
