@@ -17,6 +17,12 @@ class Pousada:
             'S': 'Standard',
             'P': 'Premium',
         }
+        self.Status_Reservas = { 
+            'A': 'Ativa',
+            'C': 'Cancelada',
+            'I': 'Check-In',
+            'O': 'Check-Out',
+        }
         self.carregaDados()
 
     #função especial para verificar se um arquivo existe ou não, será usada para garantir que os arquivos txt serão gerados se não existirem
@@ -100,6 +106,7 @@ class Pousada:
                 linha = ARQreservas.readline().strip()
                 a=linha.split(',',4)
                 #atributos->,quarto(Quarto),int(diaInicio),int(diaFim),string(cliente),char(status(A/C/I/O))
+                print(f"Carregando reserva: {a}")
                 reserva=Reserva(a[0],a[1],a[2],a[3],a[4]) #cria o objeto reserva
                 reservas.append(reserva) #coloca cada reserva(linha) em uma matriz(reservas)
                 self.reservas=reservas
@@ -140,12 +147,47 @@ class Pousada:
                 print(f"Número: {quarto.numero}")
                 print(f"Categoria: {self.tipos_categorias.get(quarto.categoria, 'Desconhecido')}") 
                 print(f"Diária: {quarto.diaria}")
-            
                 return
         raise ValueError("Quarto inválido.")
 
-    def consultaReserva(self,cliente,quarto):
-        pass
+    def consultaReserva(self, data=None, cliente=None, numero_quarto=None):
+        reservas_encontradas = []
+
+        for reserva in self.reservas:
+            # Verifica se a reserva é ativa
+            print(f"Status da reserva: {reserva.status}")
+            if reserva.status != 'A':
+                continue  
+
+            # Debug: Imprimir informações da reserva
+            print(f"Verificando reserva: {reserva}")
+
+            # Converte data para inteiro se fornecida
+            if data is not None:
+                data = int(data)
+
+            # Debug: Imprimir valores de comparação
+            print(f"Comparando data: {data} (type: {type(data)}), Dia Início: {reserva.diaInicio} (type: {type(reserva.diaInicio)}), Dia Fim: {reserva.diaFim} (type: {type(reserva.diaFim)})")
+
+
+            # Filtro com dados do input
+            if (data is None or (reserva.diaInicio <= data <= reserva.diaFim)) and \
+            (cliente is None or reserva.cliente.lower() == cliente.lower()) and \
+            (numero_quarto is None or reserva.quarto == numero_quarto):
+                reservas_encontradas.append(reserva)
+
+        if reservas_encontradas:
+            print("Reservas encontradas:")
+            for reserva in reservas_encontradas:
+                print(f"Cliente: {reserva.cliente}")
+                print(f"Data Inicial: {reserva.diaInicio}")
+                print(f"Data Final: {reserva.diaFim}")
+                quarto = next((q for q in self.quartos if q.numero == reserva.quarto), None)
+                if quarto:
+                    print(f"Dados do Quarto: {quarto}")
+                print("---------------------------")
+        else:
+            print("Nenhuma reserva encontrada com os dados informados.")
 
     def realizarReserva(datas,clitente,quarto):
         pass
@@ -234,12 +276,20 @@ while sair!=True:
         pousada.salvaDados()
         print('Dados Salvos com sucesso!')
         print('Encerrando Sistema...')
+
     elif resposta == 1:
         data=int(input('digite a data que deseja consultar'))
         numero_quarto=int(input('digite o número do quarto que deseja consultar: '))
         pousada.consultaDisponibilidade(data,numero_quarto)
+
     elif resposta == 2:
-        pousada.consultaReserva()
+        data_input = input('Digite a data que deseja consultar (ou pressione Enter para pular): ')
+        cliente = input('Digite o nome do cliente (ou pressione Enter para pular): ')
+        numero_quarto_input = input('Digite o número do quarto (ou pressione Enter para pular): ')
+        data = int(data_input) if data_input else None
+        numero_quarto = int(numero_quarto_input) if numero_quarto_input else None
+        pousada.consultaReserva(data, cliente, numero_quarto)
+        
     elif resposta == 3:
         pousada.realizarReserva()
     elif resposta == 4:
